@@ -2,9 +2,20 @@ plugins { id 'com.android.application' }
 android {
  namespace 'com.snapoto.app'
  compileSdk 35
- defaultConfig { applicationId 'com.snapoto.app'; minSdk 26; targetSdk 35; versionCode 1; versionName '0.1.0' }
+ defaultConfig { applicationId 'com.snapoto.app'; minSdk 26; targetSdk 35; versionCode 2; versionName '2.0.0' }
+ // Release signing comes from environment variables only; no keys in Git.
+ signingConfigs {
+  release {
+   if (System.getenv('SNAPOTO_KEYSTORE')) {
+    storeFile file(System.getenv('SNAPOTO_KEYSTORE'))
+    storePassword System.getenv('SNAPOTO_KEYSTORE_PASSWORD')
+    keyAlias System.getenv('SNAPOTO_KEY_ALIAS')
+    keyPassword System.getenv('SNAPOTO_KEYSTORE_PASSWORD')
+   }
+  }
+ }
  compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
- buildTypes { debug { applicationIdSuffix '.debug' }; release { minifyEnabled false } }
+ buildTypes { debug { applicationIdSuffix '.debug' }; release { minifyEnabled false; if (System.getenv('SNAPOTO_KEYSTORE')) signingConfig signingConfigs.release } }
 }
 dependencies {
  testImplementation 'junit:junit:4.13.2'
