@@ -31,6 +31,25 @@ public final class Api {
     return debuggable && base.startsWith("http://") && base.length() > 7;
   }
 
+  /** Production server used by release builds when none was entered. */
+  public static final String RELEASE_BASE = "https://snapoto.vercel.app";
+
+  /**
+   * Default server: release builds point at production; debug builds keep
+   * the previous behaviour (no default, the developer enters a URL).
+   */
+  public static String defaultBase(boolean debuggable) {
+    return debuggable ? "" : RELEASE_BASE;
+  }
+
+  /** Server in use: the saved one, else the build's default. */
+  public static String base(Context ctx) {
+    String saved = ctx
+      .getSharedPreferences("account", 0)
+      .getString("server", "");
+    return saved.isEmpty() ? defaultBase(debuggable(ctx)) : saved;
+  }
+
   static boolean debuggable(Context ctx) {
     return (
       (ctx.getApplicationInfo().flags &
@@ -41,8 +60,7 @@ public final class Api {
 
   private static HttpURLConnection open(Context ctx, String endpoint)
     throws Exception {
-    var p = ctx.getSharedPreferences("account", 0);
-    String base = p.getString("server", "");
+    String base = base(ctx);
     if (base.isEmpty()) throw new Exception("Sign in to enable cloud sync");
     if (!allowedBase(base, debuggable(ctx))) throw new Exception(
       "HTTPS is required for the server URL"

@@ -18,7 +18,7 @@ const orderResult = z.object({
   confidence: z.number().min(0).max(1),
   source_description: z.string().max(1000),
 });
-export async function modelJSON(system, content) {
+export async function modelJSON(system, content, opts = {}) {
   if (!process.env.AI_API_KEY)
     throw Object.assign(
       new Error(
@@ -34,7 +34,7 @@ export async function modelJSON(system, content) {
         Authorization: `Bearer ${process.env.AI_API_KEY}`,
         "Content-Type": "application/json",
       },
-      signal: AbortSignal.timeout(60000),
+      signal: AbortSignal.timeout(opts.timeout || 60000),
       body: JSON.stringify({
         model: process.env.AI_MODEL || META_MODEL,
         temperature: 0,

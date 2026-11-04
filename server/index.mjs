@@ -53,6 +53,12 @@ import {
   reserveAI,
 } from "./ai.mjs";
 import { sweepRetention } from "./retention.mjs";
+import {
+  registerAI,
+  initialAI,
+  processAnalyses,
+  aiHaystack,
+} from "./ai-v2.mjs";
 import { authorize, callback } from "./oauth.mjs";
 import { registerExtensions, dispatchWebhooks } from "./extensions.mjs";
 import { ZipArchive } from "archiver";
@@ -343,8 +349,15 @@ api.patch("/settings", (req, res) => {
       company: text.optional(),
       phone: z.string().max(40).optional(),
       cloud_enabled: z.boolean(),
+      ai_auto: z.boolean().optional(),
     })
     .parse(req.body);
+  const prevSettings = JSON.parse(
+    db.prepare("SELECT settings FROM spaces WHERE id=?").get(req.space)
+      .settings,
+  );
+  if (!("ai_auto" in b) && "ai_auto" in prevSettings)
+    b.ai_auto = prevSettings.ai_auto;
   db.prepare("UPDATE spaces SET settings=? WHERE id=?").run(
     JSON.stringify(b),
     req.space,
@@ -352,12 +365,37 @@ api.patch("/settings", (req, res) => {
   audit(req.space, req.uid, "settings.changed", b);
   res.json(b);
 });
+// One-tap consent from the phone: an Owner/Admin turning on backup in the
+// app authorizes original uploads for this space without visiting the web.
+api.post("/cloud-consent", (req, res) => {
+  admin(req);
+  const { enabled } = z.object({ enabled: z.boolean() }).parse(req.body);
+  const prev = JSON.parse(
+    db.prepare("SELECT settings FROM spaces WHERE id=?").get(req.space).settings,
+  );
+  const next = { retention_days: 90, ...prev, cloud_enabled: enabled };
+  db.prepare("UPDATE spaces SET settings=? WHERE id=?").run(
+    JSON.stringify(next),
+    req.space,
+  );
+  audit(req.space, req.uid, "settings.changed", {
+    cloud_enabled: enabled,
+    via: "app",
+  });
+  res.json(next);
+});
 api.get("/captures", (req, res) => {
   let rows = list(req.space, "capture");
   const { q, member, from, to, collection } = req.query;
   if (q)
     rows = rows.filter((r) =>
-      JSON.stringify([r.note, r.address, r.order_number, r.collection])
+      JSON.stringify([
+        r.note,
+        r.address,
+        r.order_number,
+        r.collection,
+        ...aiHaystack(r),
+      ])
         .toLowerCase()
         .includes(String(q).toLowerCase()),
     );
@@ -528,6 +566,7 @@ const completeCapture = async (req, res) => {
       signed_manifest: signedManifest,
       order_number: "",
       order_confirmed: false,
+      ai: initialAI({ ...b, assets, space_id: req.space }),
     },
     b.id,
   );
@@ -567,12 +606,17 @@ const exactSearch = (space, text) => {
       c.address,
       c.order_number,
       c.collection,
+      ...aiHaystack(c),
     ]).toLowerCase();
     return tokens.some((t) => hay.includes(t));
   });
 };
 api.post("/search", async (req, res) => {
-  const text = z.string().min(2).max(1000).parse(req.body.text);
+  const text = z
+    .string()
+    .min(2)
+    .max(1000)
+    .parse(req.body?.text ?? req.body?.q);
   const degraded = (reason) =>
     res.json({
       filters: { query: text, from: "", to: "", collection: "" },
@@ -598,7 +642,7 @@ api.post("/search", async (req, res) => {
     let captures = list(req.space, "capture");
     if (filters.query)
       captures = captures.filter((c) =>
-        JSON.stringify([c.note, c.address, c.order_number])
+        JSON.stringify([c.note, c.address, c.order_number, ...aiHaystack(c)])
           .toLowerCase()
           .includes(filters.query.toLowerCase()),
       );
@@ -700,9 +744,11 @@ api.patch("/captures/:cid", (req, res) => {
       collection: z.string().max(100).optional(),
       order_number: z.string().max(100).optional(),
       order_confirmed: z.boolean().optional(),
+      caption: z.string().trim().max(140).optional(),
     })
     .parse(req.body);
   if ("order_confirmed" in b || "order_number" in b) admin(req);
+  const { caption, ...rest } = b;
   const locked = lockedTemplateFields(c, req.space);
   for (const [field, keys] of Object.entries(captureEditableLocks)) {
     if (
@@ -714,7 +760,14 @@ api.patch("/captures/:cid", (req, res) => {
   const confirmationFlipped =
     ("order_number" in b && b.order_number !== (c.order_number || "")) ||
     ("order_confirmed" in b && b.order_confirmed !== c.order_confirmed);
-  let next = { ...c, ...b };
+  let next = { ...c, ...rest };
+  if (caption !== undefined)
+    next.ai = {
+      state: "off",
+      ...(c.ai || {}),
+      caption,
+      caption_edited: true,
+    };
   if (confirmationFlipped) {
     for (const a of next.assets.filter((a) => a.kind === "rendered")) {
       const file = path.join(root, "assets", a.id);
@@ -751,6 +804,9 @@ const fields = [
   "phone",
   "employee",
   "order_number",
+  "plate",
+  "meter",
+  "serial",
   "note",
   "custom",
   "verification",
@@ -1315,6 +1371,7 @@ api.get("/report.pdf", (req, res) => {
   }
   doc.end();
 });
+registerAI(api, { admin, ownerOrAdmin, record, fields });
 registerExtensions(app, api, admin, record);
 function shared(token) {
   const s = db
@@ -1445,6 +1502,8 @@ export function startWorker() {
     busy = true;
     try {
       await processJobs(baseUrl);
+      // Model calls can take a minute; never block rules and webhooks.
+      processAnalyses().catch((e) => console.error("Analysis:", e.message));
       await dispatchWebhooks();
     } catch (e) {
       console.error("Worker:", e.message);

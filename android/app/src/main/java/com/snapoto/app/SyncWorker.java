@@ -27,10 +27,27 @@ public class SyncWorker extends Worker {
    * running upload is safe because uploads resume from server offsets.
    */
   public static void enqueue(Context c, boolean manual) {
+    enqueue(c, manual, manual);
+  }
+
+  /** Re-plan the queue now (e.g. after the Wi-Fi-only setting changed). */
+  public static void reschedule(Context c) {
+    enqueue(c, false, true);
+  }
+
+  /** "Upload on Wi-Fi only" maps to WorkManager's UNMETERED constraint. */
+  static NetworkType networkType(boolean wifiOnly) {
+    return wifiOnly ? NetworkType.UNMETERED : NetworkType.CONNECTED;
+  }
+
+  private static void enqueue(Context c, boolean manual, boolean replace) {
+    boolean wifiOnly = c
+      .getSharedPreferences("account", 0)
+      .getBoolean("wifi_only", false);
     OneTimeWorkRequest req = new OneTimeWorkRequest.Builder(SyncWorker.class)
       .setConstraints(
         new Constraints.Builder()
-          .setRequiredNetworkType(NetworkType.CONNECTED)
+          .setRequiredNetworkType(networkType(wifiOnly))
           .build()
       )
       .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.SECONDS)
@@ -38,7 +55,7 @@ public class SyncWorker extends Worker {
       .build();
     WorkManager.getInstance(c).enqueueUniqueWork(
       "snapoto-sync",
-      manual ? ExistingWorkPolicy.REPLACE : ExistingWorkPolicy.APPEND_OR_REPLACE,
+      replace ? ExistingWorkPolicy.REPLACE : ExistingWorkPolicy.APPEND_OR_REPLACE,
       req
     );
   }

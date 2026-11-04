@@ -81,3 +81,17 @@ GET 的 body 是空字符串。JSON POST 的签名 body 必须与服务端 `JSON
 先 POST `/otp` 获取 `challenge_id`，再 POST `/otp/verify` 发送 `{challenge_id,code}`。六位代码有效 10 分钟、最多尝试 5 次、成功后作废。每个链接每分钟最多请求一次、每小时最多 5 次。投递结果不确定时不自动重试。访问 Cookie 为 HttpOnly、SameSite=Strict，HTTPS 时 Secure，有效期最多 30 分钟且不超过分享期限；撤销链接立即阻止访问。过期代码和会话由保留任务清理。
 
 确认记录使用 `identity_check:email_verified`、`method:email_otp` 和验证时间；这证明访问了指定邮箱，不证明现实身份或具有法律效力的签收。关闭该选项时仍是 `not_verified` / `self_reported`。
+
+## AI endpoints (V2)
+
+All under `/api/spaces/:sid`. Model output is untrusted proposed data; nothing here sends a message or sets `order_number` on its own.
+
+- Capture JSON has `ai: { state: "pending"|"done"|"failed"|"off", caption, tags[], findings[{id,field,value,confidence,where,status,accepted_value?}], issues[], model, analyzed_at, error?, caption_edited? }`. New photos are queued (`pending`) when AI is configured and `settings.ai_auto !== false`; the worker analyses each original hash once. Finding `field` ∈ `order_number|plate|meter|serial|text`; values that aren't identifier-shaped (or look like instructions/contacts/links) are dropped and counted in `ai.rejected_findings`.
+- `POST /captures/:cid/analyze` — re-run now (photographer or Owner/Admin). 503 without AI.
+- `POST /captures/:cid/findings/:fid` `{ action: "accept"|"dismiss", value?, confirm? }` — accepting `order_number` sets `order_number` (edited `value` wins) and `order_confirmed=true` only when `confirm: true`; 409 if a different number is already confirmed. Other fields go to `capture.fields[field]` (also usable as template fields `plate`, `meter`, `serial`). Members: own photos only.
+- `PATCH /captures/:cid` `{ caption }` — human caption (≤140), sets `ai.caption_edited=true`; later analyses keep it.
+- `POST /reports/daily` `{ date: "YYYY-MM-DD", tz_offset_min? }` (Owner/Admin/Viewer). `tz_offset_min` = minutes east of UTC, i.e. `-new Date().getTimezoneOffset()` (New York EDT = `-240`). Counts are computed by the server; capture ids the model invents are dropped. `GET /reports/daily?date=` → latest stored or 404; `GET /reports/daily.pdf?date=` → PDF with thumbnails.
+- `POST /search` accepts `{ text }` or `{ q }` and also matches AI caption, tags, accepted findings and `capture.fields`. `GET /captures?q=` does too.
+- `POST /templates/suggest` `{ description }` (Owner/Admin) → `{ name, fields, locked_fields, custom, reason, model }`, allowed field keys only, never saved.
+- `PATCH /settings` accepts `ai_auto` (default true; kept if omitted).
+- Webhook/audit event `capture.analyzed` `{ capture_id, state }`.

@@ -20,6 +20,9 @@ public final class Watermark {
     "phone",
     "employee",
     "order_number",
+    "plate",
+    "meter",
+    "serial",
     "note",
     "custom",
     "verification",
@@ -148,6 +151,10 @@ public final class Watermark {
           break;
         default:
           value = record.optString(key, "");
+          // plate / meter / serial come from confirmed AI findings
+          // (capture.fields) once the server has them.
+          JSONObject extra = record.optJSONObject("fields");
+          if (value.isEmpty() && extra != null) value = extra.optString(key, "");
       }
       if (!value.isEmpty()) lines.add(value);
     }

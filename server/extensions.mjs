@@ -264,6 +264,7 @@ export function registerExtensions(app, api, admin, record) {
 // on the device before upload, so the server cannot emit it truthfully.
 export const webhookEvents = [
   "capture.cloud_verified",
+  "capture.analyzed",
   "rule.started",
   "rule.needs_review",
   "notification.sent",

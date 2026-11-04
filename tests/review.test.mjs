@@ -425,3 +425,18 @@ test("webhooks carry the PRD automation topics", async () => {
     assert.ok(seen.has(t), "missing webhook topic " + t);
   assert.equal(seen.has("connector.expired"), false);
 });
+
+test("app cloud consent: owner enables uploads, member cannot, settings merge", async () => {
+  await own("/settings", "PATCH", {
+    retention_days: 30,
+    company: "Merge Co",
+    cloud_enabled: false,
+  });
+  const denied = await mem("/cloud-consent", "POST", { enabled: true });
+  assert.equal(denied.status, 403);
+  const ok = await own("/cloud-consent", "POST", { enabled: true });
+  assert.equal(ok.status, 200);
+  assert.equal(ok.data.cloud_enabled, true);
+  assert.equal(ok.data.company, "Merge Co");
+  assert.equal(ok.data.retention_days, 30);
+});

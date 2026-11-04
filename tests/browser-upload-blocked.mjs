@@ -17,7 +17,7 @@ page.on("response", (r) => {
   if (r.url().endsWith("/captures") && r.request().method() === "POST")
     posts += 1;
 });
-await page.goto("http://localhost:4310");
+await page.goto(process.env.BASE_URL || "http://localhost:4310");
 await page
   .getByRole("button", { name: "New to Snapoto? Create an account" })
   .click();
@@ -25,9 +25,10 @@ await page.locator("#name").fill("Blocked QA");
 await page.locator("#email").fill(`blocked-${Date.now()}@example.com`);
 await page.locator("#password").fill("Snapoto-QA-password-2026");
 await page.getByRole("button", { name: "Create account", exact: true }).click();
-await page.getByRole("heading", { name: "Overview", exact: true }).waitFor();
+await page.getByRole("heading", { name: "Today", exact: true }).waitFor();
 // NOTE: cloud consent deliberately left off -> upload POST returns 403.
-await page.getByRole("button", { name: "Camera", exact: true }).click();
+await page.getByRole("button", { name: "Photos", exact: true }).click();
+await page.getByRole("button", { name: "Use camera", exact: true }).click();
 const bytes = await sharp({
   create: { width: 800, height: 600, channels: 3, background: "#829bad" },
 })
