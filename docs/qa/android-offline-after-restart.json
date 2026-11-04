@@ -1,0 +1,42 @@
+[
+  {
+    "id": "0c54724f-173d-4e79-b739-cd3cd371b8c3",
+    "state": "synced",
+    "local_only": false,
+    "kind": "video",
+    "hash_verified": true,
+    "remote_present": true
+  },
+  {
+    "id": "7aa4fcc8-a1dd-4cfe-9101-bdcd41468182",
+    "state": "pending",
+    "local_only": false,
+    "kind": "photo",
+    "hash_verified": true,
+    "remote_present": false
+  },
+  {
+    "id": "814c65f5-e2ac-4695-a056-521c2bda31dd",
+    "state": "synced",
+    "local_only": false,
+    "kind": "photo",
+    "hash_verified": true,
+    "remote_present": true
+  },
+  {
+    "id": "89698910-9d1e-4bf4-a65d-37e88e8f94ab",
+    "state": "synced",
+    "local_only": false,
+    "kind": "photo",
+    "hash_verified": true,
+    "remote_present": true
+  },
+  {
+    "id": "d2e71191-ff16-4636-ade7-afb06fea44e0",
+    "state": "pending",
+    "local_only": true,
+    "kind": "photo",
+    "hash_verified": true,
+    "remote_present": false
+  }
+]

@@ -1,0 +1,29 @@
+{
+  "name": "snapoto",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "dev": "node --watch server/index.mjs",
+    "start": "node server/index.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "check": "node --check server/index.mjs && node --check web/app.js"
+  },
+  "dependencies": {
+    "archiver": "^8.0.0",
+    "express": "^5.1.0",
+    "leaflet": "^1.9.4",
+    "pdfkit": "^0.20.2",
+    "qrcode": "^1.5.4",
+    "sharp": "^0.34.0",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.0",
+    "prettier": "^3.9.10",
+    "prettier-plugin-java": "^2.11.0"
+  }
+}

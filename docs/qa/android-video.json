@@ -1,0 +1,21 @@
+{
+    "programs": [
+
+    ],
+    "streams": [
+        {
+            "codec_type": "video",
+            "width": 1280,
+            "height": 720,
+            "side_data_list": [
+                {
+
+                }
+            ]
+        }
+    ],
+    "format": {
+        "duration": "8.989500",
+        "size": "244430"
+    }
+}

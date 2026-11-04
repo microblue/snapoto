@@ -1,0 +1,184 @@
+
+> snapoto@0.1.0 test
+> node --test tests/*.test.mjs
+
+TAP version 13
+# (node:2713030) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: secrets are authenticated-encrypted
+ok 1 - secrets are authenticated-encrypted
+  ---
+  duration_ms: 0.963401
+  type: 'test'
+  ...
+# Subtest: authentication and space isolation
+ok 2 - authentication and space isolation
+  ---
+  duration_ms: 3.203846
+  type: 'test'
+  ...
+# Subtest: upload requires owner cloud consent
+ok 3 - upload requires owner cloud consent
+  ---
+  duration_ms: 11.111965
+  type: 'test'
+  ...
+# Subtest: invalid hash never creates a capture
+ok 4 - invalid hash never creates a capture
+  ---
+  duration_ms: 6.28032
+  type: 'test'
+  ...
+# Subtest: upload preserves original and verifies hash; repeated upload is idempotent
+ok 5 - upload preserves original and verifies hash; repeated upload is idempotent
+  ---
+  duration_ms: 16.499375
+  type: 'test'
+  ...
+# Subtest: id collision cannot overwrite original
+ok 6 - id collision cannot overwrite original
+  ---
+  duration_ms: 5.404381
+  type: 'test'
+  ...
+# Subtest: template locked fields enforced and render keeps original hash
+ok 7 - template locked fields enforced and render keeps original hash
+  ---
+  duration_ms: 28.976034
+  type: 'test'
+  ...
+# Subtest: share hides exact GPS, prohibits download, acknowledgment remains separate
+ok 8 - share hides exact GPS, prohibits download, acknowledgment remains separate
+  ---
+  duration_ms: 17.207132
+  type: 'test'
+  ...
+# Subtest: revoked and expired shares reject reads and acknowledgments
+ok 9 - revoked and expired shares reject reads and acknowledgments
+  ---
+  duration_ms: 4.745193
+  type: 'test'
+  ...
+# Subtest: rules require dry run and connector authorization; test never delivers
+ok 10 - rules require dry run and connector authorization; test never delivers
+  ---
+  duration_ms: 9.761259
+  type: 'test'
+  ...
+# Subtest: viewer cannot upload, modify templates or access connector credentials
+ok 11 - viewer cannot upload, modify templates or access connector credentials
+  ---
+  duration_ms: 15.990339
+  type: 'test'
+  ...
+# Subtest: connector API never returns secrets and revoked connections block publishing
+ok 12 - connector API never returns secrets and revoked connections block publishing
+  ---
+  duration_ms: 14.609604
+  type: 'test'
+  ...
+# Subtest: automation matching and send outcomes never cause duplicate messages
+ok 13 - automation matching and send outcomes never cause duplicate messages
+  ---
+  duration_ms: 86.886533
+  type: 'test'
+  ...
+# Subtest: ambiguous customer lookup never sends; provider uncertainty is not retried
+ok 14 - ambiguous customer lookup never sends; provider uncertainty is not retried
+  ---
+  duration_ms: 59.219703
+  type: 'test'
+  ...
+# Subtest: missing AI config reports explicit unavailability, never fake OCR
+ok 15 - missing AI config reports explicit unavailability, never fake OCR
+  ---
+  duration_ms: 1.898821
+  type: 'test'
+  ...
+# Subtest: share snapshot excludes subsequently created watermark assets
+ok 16 - share snapshot excludes subsequently created watermark assets
+  ---
+  duration_ms: 17.494726
+  type: 'test'
+  ...
+# Subtest: manifest signatures are independently verifiable and tamper evident
+ok 17 - manifest signatures are independently verifiable and tamper evident
+  ---
+  duration_ms: 0.992942
+  type: 'test'
+  ...
+# Subtest: signed API keys reject replays, bad signatures and revoked keys
+ok 18 - signed API keys reject replays, bad signatures and revoked keys
+  ---
+  duration_ms: 14.950217
+  type: 'test'
+  ...
+# Subtest: webhook private destinations and unconfigured OAuth are blocked
+ok 19 - webhook private destinations and unconfigured OAuth are blocked
+  ---
+  duration_ms: 3.319608
+  type: 'test'
+  ...
+# Subtest: exports return actual PDF, ZIP and CSV files
+ok 20 - exports return actual PDF, ZIP and CSV files
+  ---
+  duration_ms: 20.182076
+  type: 'test'
+  ...
+# Subtest: resumable upload persists offsets, rejects conflicting chunks and is idempotent
+ok 21 - resumable upload persists offsets, rejects conflicting chunks and is idempotent
+  ---
+  duration_ms: 47.731075
+  type: 'test'
+  ...
+# Subtest: concurrent duplicate captures preserve the first original without extra records
+ok 22 - concurrent duplicate captures preserve the first original without extra records
+  ---
+  duration_ms: 30.780554
+  type: 'test'
+  ...
+# Subtest: changing display metadata regenerates watermark without modifying earlier renders
+ok 23 - changing display metadata regenerates watermark without modifying earlier renders
+  ---
+  duration_ms: 25.90601
+  type: 'test'
+  ...
+# Subtest: email draft mode calls draft endpoint and never sends a message
+ok 24 - email draft mode calls draft endpoint and never sends a message
+  ---
+  duration_ms: 0.727149
+  type: 'test'
+  ...
+# Subtest: Twilio opt-out callbacks require a valid provider signature
+ok 25 - Twilio opt-out callbacks require a valid provider signature
+  ---
+  duration_ms: 15.554964
+  type: 'test'
+  ...
+# Subtest: email-gated shares enforce access, one-use codes, throttling and revocation
+ok 26 - email-gated shares enforce access, one-use codes, throttling and revocation
+  ---
+  duration_ms: 56.894377
+  type: 'test'
+  ...
+# Subtest: PNG originals retain their format in downloads and ZIP exports
+ok 27 - PNG originals retain their format in downloads and ZIP exports
+  ---
+  duration_ms: 47.645184
+  type: 'test'
+  ...
+# Subtest: retention removes originals, retains verification history and reports unavailability
+ok 28 - retention removes originals, retains verification history and reports unavailability
+  ---
+  duration_ms: 63.542791
+  type: 'test'
+  ...
+1..28
+# tests 28
+# suites 0
+# pass 28
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 925.736062

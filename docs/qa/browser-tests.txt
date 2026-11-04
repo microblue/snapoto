@@ -1,0 +1,1 @@
+Browser E2E passed: registration, consent, template, upload, rendering, sharing, acknowledgment, rule create/edit/dry-run, developer settings, team creation/invitation; no JS errors.

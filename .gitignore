@@ -1,0 +1,13 @@
+node_modules/
+data/
+.env
+*.log
+android/.gradle/
+android/local.properties
+android/**/build/
+test-results/
+playwright-report/
+
+dist/
+.vercel/
+.vercel
