@@ -777,6 +777,7 @@ async function photos() {
       interp = r.fallback
         ? `<div class="interp">Showing exact matches for “${esc(p.text)}”. <span class="muted">AI search isn’t set up, so plain words are matched.</span></div>`
         : `<div class="interp">${AI} understood: ${[
+            f.understood && `“${esc(f.understood)}”`,
             f.query && `words “${esc(f.query)}”`,
             f.from && `from ${esc(f.from)}`,
             f.to && `to ${esc(f.to)}`,

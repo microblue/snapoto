@@ -10,6 +10,8 @@ customers get a verified link instead of a forwarded JPEG.
 
 - **Live web app:** https://snapoto.vercel.app (create an account; no setup)
 - **Android app:** [Snapoto 2.0.0 APK](https://github.com/microblue/snapoto/releases/tag/v2.0.0)
+- **Demo video (2.5 min):** [snapoto-demo.mp4](https://github.com/microblue/snapoto/releases/download/v2.0.0/snapoto-demo.mp4)
+- **Demo login:** `demo@snapoto.example.com` / `SnapotoDemo-2026` (team "Bayview Deliveries"; sample photos are AI-generated)
 - **License:** MIT
 
 | Today (boss) | Photo with AI findings | Customer link | Android |

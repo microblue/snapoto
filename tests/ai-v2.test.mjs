@@ -256,3 +256,19 @@ test("ai_auto off keeps new photos out of the queue", async () => {
   await own("/settings", "PATCH", { retention_days: 90, cloud_enabled: true });
   assert.equal((await upload(member.token)).ai.state, "off");
 });
+
+test("semantic search keeps only real ids and reports what it understood", async () => {
+  const caps = (await own("/captures")).data;
+  assert.ok(caps.length >= 1, "earlier tests uploaded photos");
+  const real = caps[0].id;
+  modelReply = (body) => {
+    const sent = JSON.parse(body.messages[1].content);
+    assert.equal(sent.request, "crushed boxes");
+    assert.ok(sent.photos.every((p) => typeof p.caption === "string"));
+    return { ids: ["made-up-id", real, real], understood: "boxes that look damaged" };
+  };
+  const r = await own("/search", "POST", { q: "crushed boxes" });
+  assert.equal(r.status, 200);
+  assert.deepEqual(r.data.captures.map((c) => c.id), [real]);
+  assert.equal(r.data.filters.understood, "boxes that look damaged");
+});
